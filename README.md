@@ -166,14 +166,6 @@ Steps to contribute:
 3. Make changes, add tests, and update docs
 4. Submit a PR against main with a clear description
 
----
 
-If you have additional questions about the architecture, feel free to open an issue in the repo or join a discussion.
-
----
-
-License: MIT#� �D�e�v�T�u�n�e�_�A�I�_�C�o�d�i�n�g�_�A�s�s�i�s�t�a�n�t�
-�
-�#� �D�e�v�T�u�n�e�_�A�I�_�C�o�d�i�n�g�_�A�s�s�i�s�t�a�n�t�
 �
 �"# DevTune_Coding_Assistant"
