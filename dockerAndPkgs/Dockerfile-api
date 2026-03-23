@@ -1,0 +1,21 @@
+FROM continuumio/miniconda3
+
+WORKDIR /app
+
+# Copy environment file
+COPY environment-devtune.yml .
+
+# Create conda environment
+RUN conda env create -f environment-devtune.yml && conda clean -a
+
+# Activate environment for all subsequent commands
+SHELL ["conda", "run", "-n", "devtune_env", "/bin/bash", "-c"]
+
+# Copy your app
+COPY . .
+
+# Expose port for FastAPI
+EXPOSE 5555
+
+# Run your app
+CMD ["conda", "run", "-n", "devtune_env", "python", "main.py", "runserver", "0.0.0.0:5555"]

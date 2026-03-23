@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  django:
+    image: backend-django-fixed
+    container_name: django_devtune_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - "E:/Depi_GP/BACKEND:/app_backend"
+    working_dir: /app_backend
+    command: >
+      /bin/bash -c "source /opt/conda/etc/profile.d/conda.sh && conda activate django_env && python manage.py runserver 0.0.0.0:8000"
+
+  fastapi:
+    image: backend-fastapi-fixed
+    container_name: fastapi_devtune_app
+    ports:
+      - "5555:5555"
+    volumes:
+      - "E:/Depi_GP/BACKEND:/app_backend"
+    working_dir: /app_backend/API
+    command: >
+      /bin/bash -c "source /opt/conda/etc/profile.d/conda.sh && conda activate devtune_env && python main.py"

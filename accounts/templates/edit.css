@@ -1,0 +1,82 @@
+body {
+    font-family: 'Libre Baskerville', serif;
+    background: linear-gradient(135deg, #ebe8ff, #f5f2ff);
+}
+
+.card {
+    border-radius: 20px;
+    border: 1px solid #e5e1ff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px;
+    background: white;
+}
+
+.card h2 {
+    font-size: 34px;
+    font-weight: 700;
+    color: #5a3ef3;
+}
+
+.card h5 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #3a2dbf;
+    margin-bottom: 15px;
+}
+
+.card .form-control {
+    font-size: 17px;
+    font-family: 'Libre Baskerville', serif;
+    border: 1px solid #dce3ff;
+    border-radius: 10px;
+    padding: 12px 15px;
+    background-color: #f8f6ff;
+    color: #333;
+}
+
+.card .form-control:focus {
+    border-color: #6d57ff;
+    box-shadow: 0 0 0 0.2rem rgba(109, 87, 255, 0.25);
+}
+
+.card .btn-primary {
+    background-color: #6d57ff;
+    border-color: #6d57ff;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.card .btn-primary:hover {
+    background-color: #5a3ef3;
+    border-color: #5a3ef3;
+}
+
+.form-control, .bootstrap-select {
+    width: 100%;
+}
+
+footer {
+    margin-top: 40px;
+    padding: 20px;
+    text-align: center;
+    background: #f0edff;
+    border-top: 1px solid #d9d2ff;
+}
+
+footer p {
+    margin: 5px 0;
+}
+
+footer p.mb-1 {
+    color: #5a3ef3;
+    font-weight: 600;
+}
+
+footer p.small {
+    color: #6b5edb;
+    font-weight: 500;
+}

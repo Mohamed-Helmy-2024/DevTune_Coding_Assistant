@@ -1,0 +1,968 @@
+{% extends "base.html" %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block title %}DevTune - AI Developer Assistant{% endblock %}
+
+{% block body %}
+<style>
+    body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.chat-container {
+    display: flex;
+    height: calc(100vh - 120px);
+    gap: 0;
+    margin-top: 20px;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 280px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px 0 0 16px;
+    padding: 20px 0;
+    overflow-y: auto;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.new-chat-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.new-chat-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.chat-history {
+    padding: 10px 0;
+}
+
+.chat-history-item {
+    padding: 12px 20px;
+    margin: 4px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    color: #333;
+}
+
+.chat-history-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(5px);
+}
+
+.chat-history-item.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.chat-history-item .chat-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.chat-history-item .chat-date {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.delete-chat-btn {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    background: none;
+    border: none;
+    color: inherit;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.chat-history-item:hover .delete-chat-btn {
+    opacity: 1;
+}
+
+/* Main Chat Area */
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 0 16px 16px 0;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+}
+
+.chat-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chat-header h4 {
+    margin: 0;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.category-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.category-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-badge:hover, .category-badge.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+}
+
+#chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Welcome Screen */
+.welcome-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 40px;
+}
+
+.welcome-screen h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+}
+
+.welcome-screen p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 40px;
+}
+
+.suggested-prompts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    width: 100%;
+    max-width: 800px;
+    margin-top: 30px;
+}
+
+.prompt-card {
+    padding: 20px;
+    background: white;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.prompt-card:hover {
+    border-color: #667eea;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+}
+
+.prompt-card i {
+    font-size: 1.5rem;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.prompt-card h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.prompt-card p {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0;
+}
+
+/* Message Bubbles */
+.msg-bubble {
+    max-width: 75%;
+    padding: 14px 18px;
+    border-radius: 18px;
+    margin-bottom: 12px;
+    line-height: 1.6;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.msg-user {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+.msg-ai {
+    background: #f0f2f5;
+    color: #333;
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+}
+
+.typing-indicator {
+    display: flex;
+    gap: 6px;
+    padding: 14px 18px;
+    background: #f0f2f5;
+    border-radius: 18px;
+    width: fit-content;
+    margin-right: auto;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #667eea;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-10px); opacity: 1; }
+}
+
+/* Input Area */
+.chat-input-area {
+    padding: 20px 30px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    background: white;
+}
+
+.input-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 24px;
+    padding: 8px 8px 8px 20px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.input-wrapper:focus-within {
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+}
+
+#message-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 12px 0;
+    font-size: 1rem;
+    outline: none;
+    resize: none;
+    max-height: 150px;
+}
+
+.send-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.send-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+}
+
+.send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+.msg-bubble pre {
+    background-color: #1e1e1e;
+    color: #f5f5f5;
+    padding: 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.msg-bubble code {
+    background-color: #2d2d2d;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .chat-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-radius: 16px 16px 0 0;
+        max-height: 200px;
+    }
+
+    .chat-main {
+        border-radius: 0 0 16px 16px;
+    }
+
+    .welcome-screen h1 {
+        font-size: 2rem;
+    }
+
+    .suggested-prompts {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 126, 234, 0.5);
+}
+</style>
+
+<div class="container-fluid">
+    {% if user.is_authenticated %}
+    <div class="chat-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" onclick="window.location.href='{% url 'devtune:new_chat' %}'">
+                    <i class="fas fa-plus"></i> New Chat
+                </button>
+            </div>
+            
+            <div class="chat-history">
+                <div style="padding: 10px 20px; font-size: 0.75rem; font-weight: 600; color: #999; text-transform: uppercase;">
+                    Recent Chats
+                </div>
+                {% if user_chats %}
+                    {% for chat in user_chats %}
+                    <a href="{% url 'devtune:chat_panel' chat.Chat_slug %}" 
+                       class="chat-history-item {% if current_chat and chat.Chat_slug == current_chat.Chat_slug %}active{% endif %}">
+                        <div>
+                            <div class="chat-title">
+                                <i class="fas fa-message me-1"></i>
+                                {{ chat.get_display_title }}
+                            </div>
+                            <div class="chat-date">{{ chat.Chat_createdat|date:"M d, H:i" }}</div>
+                        </div>
+                        <button class="delete-chat-btn" onclick="deleteChat(event, '{{ chat.Chat_slug }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div style="padding: 20px; text-align: center; color: #999; font-size: 0.9rem;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+                        <p>No chats yet.<br>Start a conversation!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+                <div class="chat-header">
+                <h4>
+                    <i class="fas fa-robot me-2"></i>
+                    {% if current_chat %}
+                        {{ current_chat.get_display_title }}
+                    {% else %}
+                        DevTune Assistant
+                    {% endif %}
+                </h4>
+                
+                <div class="category-selector">
+                    {% for category in categories %}
+                    <span class="category-badge {% if current_chat and current_chat.Chat_category == category %}active{% endif %}" 
+                          data-category="{{ category.Category_slug }}"
+                          title="{{ category.Category_description }}">
+                        {{ category.Category_name }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% if current_chat %}
+                <div style="margin-left: 12px;">
+                    <button id="open-knowledge-btn-home" class="btn btn-sm btn-outline-secondary" title="Manage Knowledge Files">
+                        <i class="fas fa-book me-1"></i> Knowledge
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+
+            <div id="chat-box">
+                <div class="welcome-screen" id="welcome-screen">
+                    <h1><i class="fas fa-robot"></i> DevTune</h1>
+                    <p>Your AI-powered development assistant. Ask me anything!</p>
+                    
+                    <div class="suggested-prompts">
+                        <div class="prompt-card" onclick="usePrompt('Help me debug a Python function')">
+                            <i class="fas fa-bug"></i>
+                            <h5>Debug Code</h5>
+                            <p>Help me find and fix errors</p>
+                        </div>
+                        <div class="prompt-card" onclick="usePrompt('Explain how async/await works')">
+                            <i class="fas fa-graduation-cap"></i>
+                            <h5>Learn Concepts</h5>
+                            <p>Understand programming topics</p>
+                        </div>
+                        <div class="prompt-card" onclick="usePrompt('Write a REST API endpoint')">
+                            <i class="fas fa-code"></i>
+                            <h5>Generate Code</h5>
+                            <p>Create code snippets</p>
+                        </div>
+                        <div class="prompt-card" onclick="usePrompt('Review my code for best practices')">
+                            <i class="fas fa-check-circle"></i>
+                            <h5>Code Review</h5>
+                            <p>Get feedback on your code</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <form id="chat-form">
+                    {% csrf_token %}
+                    <div class="input-wrapper">
+                        <textarea id="message-input" 
+                                  placeholder="Type your message..." 
+                                  rows="1"
+                                  required></textarea>
+                        <div style="display:flex; gap:8px; align-items:center">
+                            {% if current_chat and current_chat.Chat_category and current_chat.Chat_category.Category_slug == 'rag' %}
+                            <label style="display:flex; align-items:center; gap:6px; margin-right:6px;">
+                                <input type="checkbox" id="use-rag-checkbox" name="use_rag" {% if current_chat.Chat_utility_params and current_chat.Chat_utility_params.use_rag %}checked{% endif %}> Use KB
+                            </label>
+                            <input type="number" id="rag-top-k" name="rag_top_k" value="{% if current_chat.Chat_utility_params and current_chat.Chat_utility_params.rag_top_k %}{{ current_chat.Chat_utility_params.rag_top_k }}{% else %}3{% endif %}" min="1" max="10" style="width:64px; padding:6px; border-radius:6px; border:1px solid #ddd;" title="Top-k RAG results">
+                            {% endif %}
+                            <button type="submit" class="send-btn" id="send-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Not Logged In View -->
+     <br>
+     <br>
+     <br>
+     <br>
+    <div class="welcome-screen" style="height: calc(100vh - 120px);">
+        <h1><i class="fas fa-robot"></i> Welcome to DevTune</h1>
+        <p>Your AI-powered development assistant</p>
+        <div style="display: flex; gap: 20px; margin-top: 30px;">
+            <a href="{% url 'login' %}" class="btn btn-lg btn-primary" style="padding: 15px 40px; border-radius: 12px;">
+                <i class="fas fa-sign-in-alt me-2"></i> Login
+            </a>
+            <a href="{% url 'accounts:signup' %}" class="btn btn-lg btn-outline-primary" style="padding: 15px 40px; border-radius: 12px;">
+                <i class="fas fa-user-plus me-2"></i> Register
+            </a>
+        </div>
+        
+        <div class="suggested-prompts" style="margin-top: 60px;">
+            <div class="prompt-card">
+                <i class="fas fa-code"></i>
+                <h5>Code Generation</h5>
+                <p>Generate code in any language</p>
+            </div>
+            <div class="prompt-card">
+                <i class="fas fa-bug"></i>
+                <h5>Debug Assistant</h5>
+                <p>Find and fix bugs quickly</p>
+            </div>
+            <div class="prompt-card">
+                <i class="fas fa-book"></i>
+                <h5>Learn & Teach</h5>
+                <p>Understand complex concepts</p>
+            </div>
+            <div class="prompt-card">
+                <i class="fas fa-lightbulb"></i>
+                <h5>Best Practices</h5>
+                <p>Write better, cleaner code</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Helper to get CSRF token from cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+{% if user.is_authenticated and current_chat %}
+const chatbox = document.getElementById("chat-box");
+const welcomeScreen = document.getElementById("welcome-screen");
+const sessionId = "{{ current_chat.Chat_session_id }}";
+const chatSlug = "{{ current_chat.Chat_slug }}";
+let hasMessages = false;
+
+// Auto-resize textarea
+const textarea = document.getElementById("message-input");
+textarea.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+});
+
+// Add user message
+function addUserMsg(text) {
+    if (welcomeScreen) welcomeScreen.style.display = 'none';
+    const div = document.createElement('div');
+    div.className = 'msg-bubble msg-user';
+    div.textContent = text;
+    chatbox.appendChild(div);
+    chatbox.scrollTop = chatbox.scrollHeight;
+    hasMessages = true;
+}
+
+// Add AI message
+// function addAiMsg(text) {
+//     if (welcomeScreen) welcomeScreen.style.display = 'none';
+//     const div = document.createElement('div');
+//     div.className = 'msg-bubble msg-ai';
+//     div.textContent = text;
+//     chatbox.appendChild(div);
+//     chatbox.scrollTop = chatbox.scrollHeight;
+//     hasMessages = true;
+// }
+
+function addAiMsg(text) {
+    const div = document.createElement('div');
+    div.className = 'msg-bubble msg-ai';
+    
+    // Convert Markdown to HTML
+    div.innerHTML = marked.parse(text);
+    Prism.highlightAllUnder(div);
+
+    chatbox.appendChild(div);
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+// Add typing indicator
+function showTyping() {
+    if (welcomeScreen) welcomeScreen.style.display = 'none';
+    const div = document.createElement('div');
+    div.id = 'typing-indicator';
+    div.className = 'typing-indicator';
+    div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    chatbox.appendChild(div);
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+// Remove typing indicator
+function hideTyping() {
+    const typing = document.getElementById('typing-indicator');
+    if (typing) typing.remove();
+}
+
+// Load chat history
+async function loadHistory() {
+    try {
+        const res = await fetch("http://:5555/DevTune/chat/history", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({
+                username: "{{ request.user.username }}",
+                session_id: sessionId
+            })
+        });
+
+        const data = await res.json();
+        if (data.history && data.history.length > 0) {
+            data.history.forEach(item => {
+                if (item.Human) addUserMsg(item.Human);
+                if (item.AI) addAiMsg(item.AI);
+            });
+            hasMessages = true;
+        }
+    } catch (err) {
+        console.error("Failed to load history:", err);
+    }
+}
+
+// Load history on page load
+loadHistory();
+
+// Handle form submission
+document.getElementById("chat-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    
+    const msg = textarea.value.trim();
+    if (!msg) return;
+    
+    addUserMsg(msg);
+    textarea.value = "";
+    textarea.style.height = 'auto';
+    
+    const sendBtn = document.getElementById("send-btn");
+    sendBtn.disabled = true;
+    
+    showTyping();
+    
+    try {
+        const useRagCheckbox = document.getElementById('use-rag-checkbox');
+        const useRagFlag = useRagCheckbox ? useRagCheckbox.checked : false;
+        const ragTopKInput = document.getElementById('rag-top-k');
+        const ragTopKVal = ragTopKInput ? ragTopKInput.value : 3;
+        const bodyParams = new URLSearchParams();
+        bodyParams.append('message', msg);
+        bodyParams.append('use_rag', useRagFlag ? '1' : '0');
+        if (useRagFlag) bodyParams.append('rag_top_k', ragTopKVal);
+        const res = await fetch("{% url 'devtune:send_message_ajax' current_chat.Chat_slug %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken,
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: bodyParams.toString()
+        });
+        
+        const data = await res.json();
+        hideTyping();
+        
+        if (data.response) {
+            addAiMsg(data.response);
+            
+            // If chat was converted from temporary to permanent, update the sidebar dynamically
+            if (data.chat_converted) {
+                // Add the new chat to sidebar without full reload
+                updateSidebarWithNewChat(data.chat_slug, data.chat_title);
+            }
+        } else {
+            addAiMsg("⚠️ Error: Unable to get response");
+        }
+    } catch (err) {
+        hideTyping();
+        addAiMsg("⚠️ Connection error. Please try again.");
+        console.error(err);
+    } finally {
+        sendBtn.disabled = false;
+    }
+});
+
+// Use suggested prompt
+function usePrompt(text) {
+    textarea.value = text;
+    textarea.focus();
+}
+
+// Delete chat function
+async function deleteChat(event, slug) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (!confirm('Delete this chat?')) return;
+    
+    try {
+        const res = await fetch(`/chat/${slug}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            }
+        });
+        
+        if (res.ok) {
+            location.reload();
+        }
+    } catch (err) {
+        console.error('Delete failed:', err);
+    }
+}
+
+// Update sidebar when temp chat becomes permanent
+function updateSidebarWithNewChat(slug, title) {
+    const chatHistory = document.querySelector('.chat-history');
+    const recentChatsHeader = chatHistory.querySelector('div[style*="Recent Chats"]');
+    
+    // Check if "No chats yet" message exists
+    const noChatsMsg = chatHistory.querySelector('div[style*="No chats yet"]');
+    if (noChatsMsg) {
+        noChatsMsg.remove();
+    }
+    
+    // Create new chat item
+    const newChatItem = document.createElement('a');
+    newChatItem.href = `/chat/${slug}/`;
+    newChatItem.className = 'chat-history-item active';
+    
+    const now = new Date();
+    const dateStr = now.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    
+    newChatItem.innerHTML = `
+        <div>
+            <div class="chat-title">
+                <i class="fas fa-message me-1"></i>
+                ${title}
+            </div>
+            <div class="chat-date">${dateStr}</div>
+        </div>
+        <button class="delete-chat-btn" onclick="deleteChat(event, '${slug}')">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    
+    // Insert after the "Recent Chats" header
+    if (recentChatsHeader && recentChatsHeader.nextSibling) {
+        chatHistory.insertBefore(newChatItem, recentChatsHeader.nextSibling);
+    } else {
+        chatHistory.appendChild(newChatItem);
+    }
+    
+    // Remove 'active' class from other chats
+    chatHistory.querySelectorAll('.chat-history-item').forEach(item => {
+        if (item !== newChatItem) {
+            item.classList.remove('active');
+        }
+    });
+    
+    // Update page title if needed
+    const headerTitle = document.querySelector('.chat-header h4');
+    if (headerTitle) {
+        headerTitle.innerHTML = `<i class="fas fa-robot me-2"></i>${title}`;
+    }
+}
+
+// Category selector
+document.querySelectorAll('.category-badge').forEach(badge => {
+    badge.addEventListener('click', function() {
+        const categorySlug = this.dataset.category;
+        window.location.href = `/create-chat/${categorySlug}/`;
+    });
+});
+{% endif %}
+</script>
+
+{% if current_chat %}
+<!-- Knowledge Modal (home) -->
+<div class="modal" tabindex="-1" id="knowledgeModalHome" style="display:none; position:fixed; z-index:9000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:12px; padding:20px; width:850px; max-width:95%; max-height:90%; overflow:auto;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <h5>Knowledge Files</h5>
+            <button id="close-knowledge-btn-home" class="btn btn-sm btn-light">Close</button>
+        </div>
+        <div style="display:flex; gap:12px; margin-bottom:10px; align-items:center;">
+            <input type="file" id="knowledge-file-input-home" />
+            <button id="knowledge-file-upload-btn-home" class="btn btn-primary btn-sm">Upload</button>
+            <button id="knowledge-refresh-btn-home" class="btn btn-outline-secondary btn-sm">Refresh</button>
+        </div>
+        <div style="margin-bottom:8px;">
+            <input type="text" id="knowledge-search-query-home" placeholder="Search documents..." style="width:60%; padding:6px; border:1px solid #ddd; border-radius:6px; margin-right:6px;" />
+            <button id="knowledge-search-btn-home" class="btn btn-sm btn-secondary">Search</button>
+        </div>
+        <div id="knowledge-list-home" style="margin-top:8px;">
+            Loading...
+        </div>
+    </div>
+</div>
+
+<script>
+// Home knowledge modal handlers
+const openKnowledgeBtnHome = document.getElementById('open-knowledge-btn-home');
+if (openKnowledgeBtnHome) {
+    const knowledgeModalHome = document.getElementById('knowledgeModalHome');
+    const closeKnowledgeBtnHome = document.getElementById('close-knowledge-btn-home');
+    const uploadBtnHome = document.getElementById('knowledge-file-upload-btn-home');
+    const fileInputHome = document.getElementById('knowledge-file-input-home');
+    const knowledgeListHome = document.getElementById('knowledge-list-home');
+    const refreshBtnHome = document.getElementById('knowledge-refresh-btn-home');
+    const searchBtnHome = document.getElementById('knowledge-search-btn-home');
+    const searchQueryInputHome = document.getElementById('knowledge-search-query-home');
+  
+    function showKnowledgeModalHome() { knowledgeModalHome.style.display = 'flex'; listKnowledgeDocsHome(); }
+    function hideKnowledgeModalHome() { knowledgeModalHome.style.display = 'none'; }
+    openKnowledgeBtnHome.addEventListener('click', showKnowledgeModalHome);
+    closeKnowledgeBtnHome.addEventListener('click', hideKnowledgeModalHome);
+    refreshBtnHome.addEventListener('click', (e)=>{ e.preventDefault(); listKnowledgeDocsHome(); });
+    uploadBtnHome.addEventListener('click', async (e)=>{ e.preventDefault();
+        if (!fileInputHome.files || fileInputHome.files.length === 0) { alert('Select a file'); return; }
+        const file = fileInputHome.files[0]; const fd = new FormData(); fd.append('file', file);
+        try {
+            const res = await fetch(`{% url 'devtune:rag_upload' current_chat.Chat_slug %}`, { method:'POST', headers:{ 'X-CSRFToken': csrftoken}, body:fd });
+            const data = await res.json(); if (data.success) { alert(data.message || 'Upload successful'); listKnowledgeDocsHome(); } else { alert(data.message || 'Upload failed'); }
+        } catch (err) { alert('Upload failed: ' + err); console.error(err);}  
+    });
+  
+    async function listKnowledgeDocsHome() { knowledgeListHome.innerHTML = 'Loading...'; const fd = new FormData(); fd.append('limit', 100); try { const res = await fetch(`{% url 'devtune:rag_list' current_chat.Chat_slug %}`, { method:'POST', headers:{ 'X-CSRFToken': csrftoken}, body:fd }); const data = await res.json(); if (data.success) { renderKnowledgeListHome(data.documents || []);} else { knowledgeListHome.innerHTML = '<div class="text-danger">Failed to fetch docs</div>'; } } catch(err){ knowledgeListHome.innerHTML = '<div class="text-danger">Connection error</div>'; console.error(err);} }
+  
+    function renderKnowledgeListHome(docs) {
+        if (!docs || docs.length === 0) {
+            knowledgeListHome.innerHTML = '<div class="text-muted">No documents indexed</div>';
+            return;
+        }
+        const html = docs.map(doc => {
+            // Support KnowledgeFile records (file_name, file_path) or vector-store docs (metadata)
+            const title = doc.file_name || (doc.metadata && (doc.metadata.file_name || doc.metadata.doc_hash)) || doc.id;
+            const src = doc.file_path || (doc.metadata && doc.metadata.source) || '';
+            const indexed = typeof doc.indexed !== 'undefined' ? doc.indexed : (doc.metadata && doc.metadata.doc_hash ? true : false);
+            const docCount = (doc.doc_ids && doc.doc_ids.length) || (doc.metadata && doc.metadata.chunk_id ? 1 : 0);
+            const fileNameForIndex = doc.file_name || (doc.metadata && doc.metadata.file_name) || '';
+            const docIdForDelete = doc.id || (doc.doc_ids && doc.doc_ids.length ? doc.doc_ids[0] : '');
+            return `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #f0f0f0;">
+                <div><strong>${title}</strong><div style="font-size:12px; color:#666;">${src}</div><div style="font-size:12px; color:#666;">Indexed: ${indexed ? 'Yes' : 'No'}; Chunks: ${docCount}</div></div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-sm btn-outline-primary" onclick="indexKnowledgeFileHome('${fileNameForIndex}')">Index</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteKnowledgeDocHome('${docIdForDelete}')">Delete Chunk</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteKnowledgeFileHome('${fileNameForIndex}')">Delete File</button>
+                </div>
+            </div>`;
+        }).join('');
+        knowledgeListHome.innerHTML = html;
+    }
+  
+    window.indexKnowledgeFileHome = async function(fileName) { if (!fileName) { alert('File name not known — try refreshing list'); return; } const fd = new FormData(); fd.append('file_name', fileName); try { const res = await fetch(`{% url 'devtune:rag_index' current_chat.Chat_slug %}`, { method:'POST', headers:{ 'X-CSRFToken': csrftoken }, body: fd }); const data = await res.json(); if (data.success) { alert(data.message || 'Indexed successfully'); listKnowledgeDocsHome(); } else { alert(data.message || 'Indexing failed'); } } catch (err) { alert('Index failed: ' + err); console.error(err); } }
+  
+    window.deleteKnowledgeDocHome = async function(docId) { if (!confirm('Delete this doc from KB?')) return; const fd = new FormData(); fd.append('doc_id', docId); try { const res = await fetch(`{% url 'devtune:rag_delete' current_chat.Chat_slug %}`, { method:'POST', headers:{ 'X-CSRFToken': csrftoken}, body: fd }); const data = await res.json(); if (data.success) { alert(data.message || 'Deleted'); listKnowledgeDocsHome(); } else { alert('Delete failed'); } } catch (err) { alert('Delete failed: ' + err); console.error(err); } }
+
+    window.deleteKnowledgeFileHome = async function(fileName) {
+        if (!fileName) { alert('File name required for deletion'); return; }
+        if (!confirm('Delete this file and all its KB entries?')) return;
+        const fd = new FormData();
+        fd.append('file_name', fileName);
+        try {
+            const res = await fetch(`{% url 'devtune:rag_delete' current_chat.Chat_slug %}`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken },
+                body: fd
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || 'File deleted');
+                listKnowledgeDocsHome();
+            } else {
+                alert('Delete failed');
+            }
+        } catch (err) {
+            alert('Delete failed: ' + err);
+            console.error(err);
+        }
+    }
+  
+    searchBtnHome.addEventListener('click', async function(e) { const q = searchQueryInputHome.value.trim(); if (!q) return; knowledgeListHome.innerHTML = 'Searching...'; const fd = new FormData(); fd.append('query', q); fd.append('top_k', 5); try { const res = await fetch(`{% url 'devtune:rag_search' current_chat.Chat_slug %}`, { method:'POST', headers:{ 'X-CSRFToken': csrftoken }, body: fd }); const data = await res.json(); if (data.results) { renderKnowledgeListHome(data.results); } else { knowledgeListHome.innerHTML = '<div class="text-danger">Search failed</div>'; } } catch (err) { knowledgeListHome.innerHTML = '<div class="text-danger">Search error</div>'; console.error(err);} });
+}
+</script>
+{% endif %}
+
+{% endblock %}

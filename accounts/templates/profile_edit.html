@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load bootstrap4 %}
+
+{% block title %}Edit Profile{% endblock title %}
+
+{% block extra_css %}
+<style>
+body {
+    font-family: 'Libre Baskerville', serif;
+    background: linear-gradient(135deg, #ebe8ff, #f5f2ff);
+}
+
+.card {
+    border-radius: 20px;
+    border: 1px solid #e5e1ff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px;
+    background: white;
+}
+
+.card h2 {
+    font-size: 34px;
+    font-weight: 700;
+    color: #5a3ef3;
+}
+
+.card h5 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #3a2dbf;
+    margin-bottom: 15px;
+}
+
+.card input.form-control,
+.card select.form-control,
+.card textarea.form-control {
+    font-family: 'Libre Baskerville', serif !important;
+    font-size: 17px !important;
+    padding: 12px !important;
+    border-radius: 10px !important;
+    background-color: #f8f6ff !important;
+    border: 1px solid #dce3ff !important;
+    color: #333 !important;
+}
+
+.card input.form-control:focus,
+.card select.form-control:focus,
+.card textarea.form-control:focus {
+    border-color: #6d57ff !important;
+    box-shadow: 0 0 0 0.2rem rgba(109, 87, 255, 0.25) !important;
+}
+
+.card .btn-primary {
+    background-color: #6d57ff !important;
+    border-color: #6d57ff !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    padding: 12px !important;
+    border-radius: 10px !important;
+}
+
+.card .btn-primary:hover {
+    background-color: #5a3ef3 !important;
+    border-color: #5a3ef3 !important;
+}
+
+footer {
+    margin-top: 40px;
+    padding: 20px;
+    text-align: center;
+    background: #f0edff;
+    border-top: 1px solid #d9d2ff;
+}
+
+footer p {
+    margin: 5px 0;
+}
+
+footer p.mb-1 {
+    color: #5a3ef3;
+    font-weight: 600;
+}
+
+footer p.small {
+    color: #6b5edb;
+    font-weight: 500;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="profile-edit py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-md-10">
+        <div class="card shadow-sm">
+          <div class="card-body p-5">
+            <h2 class="text-center mb-4">Edit Your Profile</h2>
+
+            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+              {% csrf_token %}
+
+              <div class="mb-4">
+                <h5 class="mb-3">User Information</h5>
+                {% bootstrap_form userform %}
+              </div>
+
+              <div class="mb-4">
+                <h5 class="mb-3">Profile Details</h5>
+                {% bootstrap_form profileform %}
+              </div>
+
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock body %}

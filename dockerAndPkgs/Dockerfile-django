@@ -1,0 +1,19 @@
+FROM continuumio/miniconda3:latest
+
+WORKDIR /app
+
+# Copy environment file
+COPY environment-django.yml .
+
+# Create conda env
+RUN conda env create -f environment-django.yml && conda clean -a
+
+# Activate env for the rest of the Dockerfile
+SHELL ["conda", "run", "-n", "django_env", "/bin/bash", "-c"]
+
+# Copy the project files
+COPY . .
+
+EXPOSE 8000
+
+CMD ["conda", "run", "-n", "django_env", "python", "manage.py", "runserver", "0.0.0.0:8000"]

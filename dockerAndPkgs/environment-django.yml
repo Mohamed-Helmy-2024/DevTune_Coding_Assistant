@@ -1,0 +1,13 @@
+name: django_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - django=5.2.8
+  - pip
+  - pillow
+  # add other conda-available packages only
+  - pip:
+    - django-bootstrap4==25.3
+    - django-countries==8.1.1

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  {{ profile.user.first_name }} {{ profile.user.last_name }}
+{% endblock %}
+
+{% block extra_css %}
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+
+<section class="py-5" style="background: linear-gradient(135deg, #ebe8ff, #f5f2ff);">
+  <div class="container">
+
+    <div class="shadow-lg rounded-4 p-5 mx-auto"
+         style="max-width: 1100px; background: white; border: 1px solid #e5e1ff;">
+
+      <div class="row align-items-center gy-4">
+
+<!-- LEFT SIDE (INFO) -->
+<div class="col-lg-8">
+
+  <h2 class="fw-bold mb-4" style="font-family: 'Roboto Slab', serif; color: #5a3ef3; margin-left: 10px; font-size: 40px; ">
+    {{ profile.user.first_name }} {{ profile.user.last_name }}
+  </h2>
+
+  <div class="profile-grid" style="
+        font-family: 'Libre Baskerville', serif;
+        display: grid;
+        grid-template-columns: 160px auto;
+        row-gap: 8px;
+        column-gap: 10px;
+        margin-left: 10px;
+        font-size: 20px;
+      ">
+
+    <div class="fw-semibold text-dark">Email:</div>
+    <div class="text-muted">{{ profile.user.email }}</div>
+
+    <div class="fw-semibold text-dark">Username:</div>
+    <div class="text-muted">{{ profile.user.username }}</div>
+
+    <div class="fw-semibold text-dark">Bio:</div>
+    <div class="text-muted">{{ profile.bio|safe }}</div>
+
+    <div class="fw-semibold text-dark">Member Since:</div>
+    <div class="text-muted">{{ profile.user.date_joined|date:"F j, Y" }}</div>
+
+    <div class="fw-semibold text-dark">Balance:</div>
+    <div class="text-muted">${{ profile.balance|safe }}</div>
+
+  </div>
+
+  {% if profile.user == request.user %}
+  <div class="mt-4 d-flex flex-wrap gap-3" style="margin-left: 10px;">
+    <a href="{% url 'accounts:profile_edit' %}" class="btn text-white px-4"
+       style="background: rgba(109, 87, 255, 1);">
+      Edit Profile
+    </a>
+
+    <a href="{% url 'accounts:del_account' profile.slug %}" class="btn btn-danger px-4"
+    style="background-color:#9b7cff; border-color:#9b7cff; color:white;">
+      Delete Account
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+        <!-- RIGHT SIDE (IMAGE) -->
+        <div class="col-lg-4 text-center">
+
+          <div class="mx-auto rounded-circle shadow"
+               style="width: 260px; height: 260px; border: 4px solid #a99bff; overflow: hidden;">
+
+            {% if profile.img %}
+              <img src="{{ profile.img.url }}" class="w-100 h-100 object-fit-cover">
+            {% else %}
+              <img src="{% static 'images/default-profile.png' %}" class="w-100 h-100 object-fit-cover">
+            {% endif %}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer class="mt-5 py-4 text-center"
+        style="background: #f0edff; border-top: 1px solid #d9d2ff;">
+  <div class="container">
+
+    <p class="mb-1" style="color: #5a3ef3; font-weight: 600;">
+      © {{ now|date:"Y" }} DevTune – All Rights Reserved
+    </p>
+
+    <p class="small text-muted">
+      Your AI-powered developer companion
+    </p>
+
+  </div>
+</footer>
+
+{% endblock %}

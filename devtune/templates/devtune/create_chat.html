@@ -1,0 +1,10 @@
+<!-- auto_submit.html -->
+<form id="autoForm" method="POST" action="{% url 'devtune:create_chat' category_slug='Generator' %}">
+    {% csrf_token %}
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("autoForm").submit();
+});
+</script>

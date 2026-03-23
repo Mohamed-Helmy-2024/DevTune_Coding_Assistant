@@ -1,0 +1,26 @@
+name: devtune_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pandas
+  - faiss-cpu=1.7.4    # Install via conda-forge
+  - pip:
+    - fastapi==0.120.0
+    - uvicorn[standard]==0.23.2
+    - chromadb==1.3.5
+    - pydantic==2.8.2
+    - openai
+    - cohere
+    - ollama-python
+    - ollama
+    - sqlalchemy
+    - aiosqlite
+    - langchain-core==0.3.79
+    - langchain-community==0.3.31
+    - langchain==0.3.27
+    - pypdf
+    

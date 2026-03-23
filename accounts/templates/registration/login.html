@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+
+{% block extra_css %}
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+
+<section class="py-5" style="background: linear-gradient(135deg, #ebe8ff, #f5f2ff); min-height: 80vh;">
+  <div class="container">
+
+    <div class="shadow-lg rounded-4 p-5 mx-auto" style="max-width: 500px; background: white; border: 1px solid #e5e1ff;">
+
+      <h2 class="fw-bold mb-5 text-center" style="font-family: 'Roboto Slab', serif; color: #5a3ef3; font-size: 36px;">
+        Login
+      </h2>
+
+      {% if form.errors %}
+        <div class="alert alert-danger text-center" role="alert">
+          Your username and password didn't match. Please try again.
+        </div>
+      {% endif %}
+
+      {% if next %}
+        {% if user.is_authenticated %}
+          <div class="alert alert-warning text-center" role="alert">
+            Your account doesn't have access to this page. To proceed, please login with an account that has access.
+          </div>
+        {% else %}
+          <div class="alert alert-info text-center" role="alert">
+            Please login to see this page.
+          </div>
+        {% endif %}
+      {% endif %}
+
+      <form method="post" action="{% url 'login' %}" class="needs-validation" novalidate style="font-family: 'Libre Baskerville', serif; font-size: 18px; margin-top: -10px;">
+        {% csrf_token %}
+
+        <div class="mb-4">
+          <label for="{{ form.username.id_for_label }}" class="form-label" 
+                 style="font-weight: 600; color: #3a2dbf; transition: all 0.3s;">
+            {{ form.username.label_tag }}
+          </label>
+          {{ form.username }}
+          <div class="invalid-feedback">
+            Please enter a valid username.
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="{{ form.password.id_for_label }}" class="form-label"
+                 style="font-weight: 600; color: #3a2dbf; transition: all 0.3s;">
+            {{ form.password.label_tag }}
+          </label>
+          {{ form.password }}
+          <div class="invalid-feedback">
+            Please enter your password.
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 mb-3">
+          <button type="submit" class="btn text-white" style="background: #6d57ff; font-weight: 600;">Login</button>
+        </div>
+
+        <input type="hidden" name="next" value="{{ next }}">
+      </form>
+
+      <div class="text-center">
+        <a href="{% url 'password_reset' %}" class="text-decoration-none" style="color: #5a3ef3;">Lost password?</a>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  // Labels animation on focus
+  const inputs = document.querySelectorAll("input");
+  inputs.forEach(input => {
+    input.addEventListener("focus", () => {
+      const label = input.previousElementSibling;
+      if(label) label.style.color = "#6d57ff";
+    });
+    input.addEventListener("blur", () => {
+      const label = input.previousElementSibling;
+      if(label) label.style.color = "#3a2dbf";
+    });
+  });
+</script>
+
+{% endblock %}
