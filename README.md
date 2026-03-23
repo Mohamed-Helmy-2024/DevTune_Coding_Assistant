@@ -166,6 +166,3 @@ Steps to contribute:
 3. Make changes, add tests, and update docs
 4. Submit a PR against main with a clear description
 
-
-�
-�"# DevTune_Coding_Assistant"
